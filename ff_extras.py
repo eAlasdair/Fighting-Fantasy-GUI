@@ -3,27 +3,29 @@ Alasdair Smith
 Started 20/12/2016
 
 Module for the Fighting Fantasy Program
-Includes the initial decision question GUI, a couple of helper functions,
+Includes the initial decision question GUI, a few helper functions,
     and code to run the whole program
 
 For Fighting Fantasy Gamebooks:
 Ian Livingstone's Caverns of the White Witch & similar
 """
-
 from tkinter import *
 from tkinter.font import *
 #from tkinter.ttk import * #Can't use because it's buttons don't support fonts
-from ff_charactersheet import *
-from ff_combatscreen import *
+import ff_charactersheet
+import ff_combatscreen
 import random
+import copy
 
 #THIS IS THE INITIAL QUESTION GUI FOR THE PROGRAM
 class QuestionGui:
-    """Full program or just combat calculator button window
+    """
+    Full program or just combat calculator button window
     
     Attributes:
     questionwindow: the window holding the gui
-    full_or_combat: the word states the program to be run, None if not chosen"""
+    full_or_combat: the word states the program to be run, None if not chosen
+    """
     
     def __init__(self, window):
         """Initialises, then opens the gui for the question to be answered"""
@@ -31,7 +33,7 @@ class QuestionGui:
         self.full_or_combat = None
         
         #Set custom fonts
-        self.headerfont = Font(family=FONT_FAMILY, size=BIG_FONT)
+        self.headerfont = Font(family=ff_charactersheet.FONT_FAMILY, size=ff_charactersheet.BIG_FONT)
         
         #Finish by running the main question screen
         self.run_question()
@@ -61,20 +63,29 @@ def roll_dice(dice=1, sides=6):
     """Returns an integer representing a throw of [dice] [sides] sided dice"""
     return random.randint(dice, (dice * sides))
 
+def make_default_enemy():
+    """Creates a basic enemy Character from charactersheet global ENEMY_NAME"""
+    return ff_charactersheet.Character(name=ff_charactersheet.ENEMY_NAME)
+
+def copy_dict(dictionary):
+    """Returns a NEW dictionary with the same values as the old one"""
+    return copy.deepcopy(dictionary)
+
 def run_code():
-    """Piddly little bit of code that runs everything"""
+    """Little bit of code that runs everything"""
     questionwindow = Tk()
     question_gui = QuestionGui(questionwindow)
     questionwindow.mainloop()
     
-    blank_character=Character()
+    blank_character = ff_charactersheet.Character()
     
     if question_gui.full_or_combat == "combat":
-        run_combat_gui(NO_NAME, blank_character.stats)
+        ff_combatscreen.run_combat_gui(blank_character, make_default_enemy())
     elif question_gui.full_or_combat == "full":
         characterwindow = Tk()
-        character_gui = CharacterSheetGui(characterwindow, blank_character)
+        character_gui = ff_charactersheet.CharacterSheetGui(characterwindow, blank_character)
         characterwindow.mainloop()
+    #else window was closed by other means, so take no further action
 
 def main():
     """Starts the entire program"""
